@@ -1,15 +1,41 @@
-# Installation
-> `npm install --save @types/validator`
+# retry-as-promised
 
-# Summary
-This package contains type definitions for validator (https://github.com/validatorjs/validator.js).
+Retry promises when they fail
 
-# Details
-Files were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/validator.
+## Installation
 
-### Additional Details
- * Last updated: Wed, 03 Sep 2025 06:39:39 GMT
- * Dependencies: none
+```sh
+$ npm install --save retry-as-promised
+$ yarn add retry-as-promised
+```
 
-# Credits
-These definitions were written by [tgfjt](https://github.com/tgfjt), [Ilya Mochalov](https://github.com/chrootsu), [Ayman Nedjmeddine](https://github.com/IOAyman), [Louay Alakkad](https://github.com/louy), [Bonggyun Lee](https://github.com/deptno), [Naoto Yokoyama](https://github.com/builtinnya), [Philipp Katz](https://github.com/qqilihq), [Jace Warren](https://github.com/keatz55), [Munif Tanjim](https://github.com/MunifTanjim), [Vlad Poluch](https://github.com/vlapo), [Piotr Błażejewicz](https://github.com/peterblazejewicz), [Matteo Nista](https://github.com/Mattewn99), [Daniel Freire](https://github.com/dcfreire), and [Rik Smale](https://github.com/WikiRik).
+## Configuration
+
+```js
+var retry = require('retry-as-promised').default;
+
+var warningFn = function(msg){ someLoggingFunction(msg, 'notice'); };
+
+// Will call the until max retries or the promise is resolved.
+return retry(function (options) {
+  // options.current, times callback has been called including this call
+  return promise;
+}, {
+  max: 3, // maximum amount of tries
+  timeout: 10000 // throw if no response or error within millisecond timeout, default: undefined,
+  match: [ // Must match error signature (ala bluebird catch) to continue
+    Sequelize.ConnectionError,
+    'SQLITE_BUSY'
+  ],
+  backoffBase: 1000 // Initial backoff duration in ms. Default: 100,
+  backoffExponent: 1.5 // Exponent to increase backoff each try. Default: 1.1
+  backoffJitter: 150 // Amount of randomized jitter in ms to add to retry interval to spread retries out over time. Default: 0.0.
+  report: warningFn, // the function used for reporting; must have a (string, object) argument signature, where string is the message that will passed in by retry-as-promised, and the object will be this configuration object + the $current property
+  name:  'SourceX' // if user supplies string, it will be used when composing error/reporting messages; else if retry gets a callback, uses callback name in erroring/reporting; else (default) uses literal string 'unknown'
+});
+```
+
+## Tested with
+
+- Bluebird
+- Q
